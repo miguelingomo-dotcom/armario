@@ -1,0 +1,1391 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Inés Wardrobe</title>
+<!-- PWA -->
+<link rel="manifest" href="manifest.json">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Inés Wardrobe">
+<link rel="apple-touch-icon" href="icon-192.png">
+<meta name="theme-color" content="#007AFF">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=SF+Pro+Display:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    /* ACCENT */
+    --ios-blue: #007AFF;
+    --ios-red: #FF3B30;
+    --ios-green: #34C759;
+    --ios-orange: #FF9500;
+    --ios-purple: #AF52DE;
+    --ios-pink: #FF2D55;
+    --ios-teal: #5AC8FA;
+    --ios-indigo: #5856D6;
+    /* LIGHT THEME (default) */
+    --bg: #F2F2F7;
+    --bg2: #FFFFFF;
+    --bg3: #F2F2F7;
+    --label: #000000;
+    --label2: rgba(60,60,67,0.6);
+    --label3: rgba(60,60,67,0.3);
+    --separator: rgba(60,60,67,0.18);
+    --fill: rgba(120,120,128,0.2);
+    --fill2: rgba(120,120,128,0.16);
+    --fill3: rgba(118,118,128,0.12);
+    --accent: #007AFF;
+    --accent-label: #ffffff;
+    --gold: #c9a96e;
+    --font: -apple-system, "SF Pro Display", "SF Pro Text", "Helvetica Neue", sans-serif;
+    --radius-sm: 10px;
+    --radius-md: 13px;
+    --radius-lg: 16px;
+    --radius-xl: 20px;
+    --tab-height: 83px;
+    --safe-bottom: env(safe-area-inset-bottom, 20px);
+  }
+
+  /* DARK/NAVY THEME */
+  [data-theme="dark"] {
+    --bg: #0f0f1a;
+    --bg2: #1a1a2e;
+    --bg3: #12121f;
+    --label: #e8c99a;
+    --label2: rgba(232,201,154,0.6);
+    --label3: rgba(232,201,154,0.3);
+    --separator: rgba(201,169,110,0.18);
+    --fill: rgba(201,169,110,0.12);
+    --fill2: rgba(201,169,110,0.1);
+    --fill3: rgba(201,169,110,0.08);
+    --accent: #c9a96e;
+    --accent-label: #1a1a2e;
+    --ios-blue: #c9a96e;
+    --ios-red: #e07a5f;
+    --ios-green: #7dc99a;
+  }
+
+  /* Smooth theme transition */
+  *, *::before, *::after {
+    transition: background-color .3s ease, color .3s ease, border-color .3s ease, box-shadow .3s ease;
+  }
+  /* But NOT on cards animation or transforms */
+  .prenda-card, #fab, nav button, .tab-item {
+    transition: transform .15s ease, opacity .15s ease, background-color .3s ease, color .3s ease !important;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  html, body { height: 100%; background: var(--bg); font-family: var(--font); color: var(--label); overscroll-behavior: none; }
+
+  /* DEVICE FRAME (desktop only) */
+  .device-wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    padding: 40px 20px;
+    background: #E5E5EA;
+  }
+  .device-frame {
+    width: 393px;
+    height: 852px;
+    background: var(--bg);
+    border-radius: 55px;
+    box-shadow:
+      0 0 0 11px #1C1C1E,
+      0 0 0 13px #3A3A3C,
+      0 30px 80px rgba(0,0,0,0.45),
+      0 10px 30px rgba(0,0,0,0.2);
+    overflow: hidden;
+    position: relative;
+    flex-shrink: 0;
+  }
+  .device-notch {
+    position: absolute;
+    top: 0; left: 50%; transform: translateX(-50%);
+    width: 126px; height: 37px;
+    background: #1C1C1E;
+    border-radius: 0 0 22px 22px;
+    z-index: 200;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .device-camera { width: 12px; height: 12px; background: #0a0a0a; border-radius: 50%; border: 1px solid #2a2a2a; }
+  .device-screen {
+    width: 100%; height: 100%;
+    overflow: hidden;
+    position: relative;
+    border-radius: 55px;
+  }
+
+  /* STATUS BAR — oculta en móvil real, visible solo en el frame de escritorio */
+  #fab:active {
+    transform: scale(0.91);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+  }
+
+  @media (max-width: 767px) {
+    .status-bar { display: none !important; }
+  }
+  /* STATUS BAR */
+  .status-bar {
+    height: 52px;
+    padding: 14px 20px 0;
+    display: flex; align-items: center; justify-content: space-between;
+    position: sticky; top: 0; z-index: 100;
+    background: var(--bg);
+  }
+  /* On real mobile: hide fake clock & signal icons, keep only theme toggle */
+  @media (max-width: 767px) {
+    .status-time { display: none; }
+    .status-icons { display: none; }
+    .status-bar { height: 44px; padding-top: 8px; justify-content: flex-end; }
+  }
+  .status-time { font-size: 15px; font-weight: 600; letter-spacing: -0.3px; }
+  .status-icons { display: flex; gap: 6px; align-items: center; }
+  .status-icons svg { opacity: 0.85; }
+
+  /* APP SHELL */
+  .app-shell {
+    width: 100%; height: 100%;
+    display: flex; flex-direction: column;
+    overflow: hidden;
+    position: relative;
+  }
+
+  /* SCROLL AREA */
+  .scroll-area {
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: calc(var(--tab-height) + 8px);
+    scroll-behavior: smooth;
+  }
+  .scroll-area::-webkit-scrollbar { display: none; }
+
+  /* LARGE TITLE NAV */
+  .large-nav {
+    padding: 0 20px 8px;
+    background: var(--bg);
+    display: flex; align-items: flex-end; justify-content: space-between;
+  }
+  .large-nav .nav-left { flex: 1; }
+  .large-nav .large-title {
+    font-size: 34px; font-weight: 700;
+    letter-spacing: -0.5px;
+    color: var(--label);
+    line-height: 1.1;
+  }
+  .large-nav .nav-sub { font-size: 13px; color: var(--label2); margin-top: 2px; }
+  .theme-toggle-btn {
+    flex-shrink: 0;
+    background: var(--fill2);
+    border: 0.5px solid var(--separator);
+    border-radius: 20px;
+    padding: 6px 12px;
+    display: flex; align-items: center; gap: 5px;
+    cursor: pointer;
+    font-size: 12px; font-weight: 600;
+    color: var(--label2);
+    font-family: var(--font);
+    margin-bottom: 4px;
+    -webkit-tap-highlight-color: transparent;
+    transition: background .15s, transform .1s;
+  }
+  .theme-toggle-btn:active { transform: scale(0.94); }
+
+  /* SEARCH BAR iOS style */
+  .search-wrap { padding: 8px 16px 4px; }
+  .search-bar {
+    background: var(--fill2);
+    border-radius: var(--radius-sm);
+    display: flex; align-items: center; gap: 7px;
+    padding: 8px 12px;
+    height: 36px;
+  }
+  .search-bar svg { opacity: 0.4; flex-shrink: 0; }
+  .search-bar input {
+    border: none; background: transparent; outline: none;
+    font-size: 17px; font-family: var(--font); color: var(--label);
+    flex: 1; width: 100%;
+  }
+  .search-bar input::placeholder { color: var(--label3); }
+
+  /* SECTION HEADER */
+  .section-header {
+    font-size: 13px; font-weight: 600;
+    color: var(--label2); letter-spacing: 0.1px;
+    text-transform: uppercase;
+    padding: 16px 20px 6px;
+  }
+
+  /* SEGMENT CONTROL */
+  .segment-wrap { padding: 6px 16px 10px; }
+  .segment {
+    background: var(--fill2);
+    border-radius: var(--radius-sm);
+    display: flex; padding: 2px; gap: 2px;
+  }
+  .segment button {
+    flex: 1; border: none; cursor: pointer;
+    font-size: 13px; font-weight: 500; font-family: var(--font);
+    color: var(--label2);
+    padding: 6px 4px; border-radius: 9px;
+    background: transparent; transition: all .2s ease;
+  }
+  .segment button.active {
+    background: var(--bg2); color: var(--label);
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1), 0 0.5px 1px rgba(0,0,0,0.08);
+    font-weight: 600;
+  }
+
+  /* STATS ROW */
+  .stats-row {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px;
+    padding: 4px 16px 12px;
+  }
+  .stat-tile {
+    background: var(--bg2);
+    border-radius: var(--radius-md);
+    padding: 12px 10px;
+    text-align: center;
+  }
+  .stat-tile .st-val { font-size: 22px; font-weight: 700; color: var(--label); letter-spacing: -0.5px; }
+  .stat-tile .st-label { font-size: 11px; color: var(--label2); margin-top: 1px; font-weight: 500; }
+
+  /* CHIPS / FILTER PILLS */
+  .chips-scroll { padding: 0 16px 10px; display: flex; gap: 7px; overflow-x: auto; }
+  .chips-scroll::-webkit-scrollbar { display: none; }
+  .chip {
+    flex-shrink: 0; padding: 6px 14px;
+    border-radius: 20px; font-size: 14px; font-weight: 500;
+    background: var(--bg2); color: var(--label2);
+    border: 1px solid var(--separator); cursor: pointer;
+    transition: all .15s ease;
+    white-space: nowrap;
+  }
+  .chip.active { background: var(--accent); color: var(--accent-label); border-color: var(--accent); }
+
+  /* GRID DE PRENDAS */
+  .prendas-grid {
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 10px; padding: 0 16px 8px;
+  }
+  @keyframes cardIn {
+    from { opacity:0; transform:translateY(14px) scale(0.97); }
+    to   { opacity:1; transform:translateY(0) scale(1); }
+  }
+  .prenda-card {
+    background: var(--bg2);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    cursor: pointer;
+    position: relative;
+    transition: transform .15s ease;
+    -webkit-tap-highlight-color: transparent;
+    animation: cardIn .35s ease both;
+  }
+  .prenda-card:active { transform: scale(0.97); }
+  .prenda-card .card-img {
+    height: 130px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 52px;
+    position: relative;
+  }
+  .prenda-card .card-img .usos-pill {
+    position: absolute; top: 8px; right: 8px;
+    background: rgba(0,0,0,0.55); backdrop-filter: blur(8px);
+    color: #fff; font-size: 11px; font-weight: 600;
+    padding: 3px 8px; border-radius: 12px;
+  }
+  .prenda-card .card-img .color-dot-img {
+    position: absolute; bottom: 8px; left: 8px;
+    width: 16px; height: 16px; border-radius: 50%;
+    border: 2px solid rgba(255,255,255,0.8);
+    box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+  }
+  .prenda-card .card-body { padding: 10px 12px 12px; }
+  .prenda-card .card-nombre { font-size: 14px; font-weight: 600; color: var(--label); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .prenda-card .card-meta { font-size: 12px; color: var(--label2); margin-top: 2px; }
+  .prenda-card .card-tags { display: flex; gap: 4px; flex-wrap: wrap; margin-top: 6px; }
+  .ctag {
+    font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 8px;
+  }
+
+  /* Delete button on card */
+  .del-card-btn {
+    position: absolute; top: 7px; left: 7px;
+    width: 24px; height: 24px; border-radius: 50%;
+    background: rgba(0,0,0,0.5); backdrop-filter: blur(6px);
+    border: none; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    opacity: 0; transition: opacity .2s;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .prenda-card:hover .del-card-btn,
+  .prenda-card:active .del-card-btn { opacity: 1; }
+
+  /* Always show on touch devices */
+  @media (hover: none) { .del-card-btn { opacity: 1; } }
+
+
+  .ctag.verano { background: #FFF3CD; color: #8B5E00; }
+  .ctag.invierno { background: #DCEEFF; color: #0055AA; }
+  .ctag.entretiempo { background: #E8F5E9; color: #2E7D32; }
+  .ctag.casual { background: #EDE7F6; color: #512DA8; }
+  .ctag.sport { background: #E0F2F1; color: #00695C; }
+  .ctag.trabajo { background: #FCE4EC; color: #880E4F; }
+
+  /* BOTÓN PRIMARIO IOS */
+  .ios-btn-primary {
+    margin: 0 16px 12px;
+    background: var(--accent);
+    color: var(--accent-label); border: none;
+    border-radius: var(--radius-md);
+    font-size: 17px; font-weight: 600; font-family: var(--font);
+    padding: 14px;
+    width: calc(100% - 32px);
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+    transition: opacity .15s;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .ios-btn-primary:active { opacity: 0.8; }
+
+  /* LISTA iOS (inset grouped) */
+  .ios-list { margin: 0 16px 16px; }
+  .ios-list-row {
+    background: var(--bg2);
+    padding: 12px 16px;
+    display: flex; align-items: center; gap: 12px;
+    cursor: pointer; transition: background .1s;
+    position: relative;
+  }
+  .ios-list-row:first-child { border-radius: var(--radius-md) var(--radius-md) 0 0; }
+  .ios-list-row:last-child { border-radius: 0 0 var(--radius-md) var(--radius-md); }
+  .ios-list-row:only-child { border-radius: var(--radius-md); }
+  .ios-list-row + .ios-list-row::before {
+    content: ''; position: absolute; top: 0; left: 56px; right: 0;
+    height: 0.5px; background: var(--separator);
+  }
+  .ios-list-row:active { background: var(--fill3); }
+  .ios-list-row .row-icon {
+    width: 32px; height: 32px; border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 17px; flex-shrink: 0;
+  }
+  .ios-list-row .row-content { flex: 1; min-width: 0; }
+  .ios-list-row .row-title { font-size: 17px; color: var(--label); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .ios-list-row .row-sub { font-size: 13px; color: var(--label2); margin-top: 1px; }
+  .ios-list-row .row-right { display: flex; align-items: center; gap: 4px; color: var(--label3); }
+  .ios-list-row .row-right .chevron { font-size: 14px; opacity: 0.4; }
+  .ios-list-row .row-badge { background: var(--accent); color: var(--accent-label); font-size: 12px; font-weight: 700; padding: 2px 7px; border-radius: 10px; }
+
+  /* HOY SECTION */
+  .hoy-hero {
+    margin: 0 16px 12px;
+    background: linear-gradient(135deg, var(--accent) 0%, #5856D6 100%);
+    border-radius: var(--radius-xl);
+    padding: 20px;
+    color: #fff;
+  }
+  [data-theme="dark"] body { background: #0a0a14; }
+  [data-theme="dark"] .device-frame {
+    box-shadow: 0 0 0 11px #0d0d1a, 0 0 0 13px #1a1a2e, 0 30px 80px rgba(0,0,0,0.7), 0 10px 30px rgba(0,0,0,0.4);
+  }
+  [data-theme="dark"] .tab-bar {
+    background: rgba(15,15,26,0.85);
+  }
+  [data-theme="dark"] .status-bar {
+    background: var(--bg);
+  }
+  [data-theme="dark"] .large-nav {
+    background: var(--bg);
+  }
+  [data-theme="dark"] .hoy-hero {
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+    border: 1px solid rgba(201,169,110,0.3);
+    color: #e8c99a;
+  }
+  .hoy-hero .hero-label { font-size: 13px; font-weight: 600; opacity: 0.75; text-transform: uppercase; letter-spacing: 0.5px; }
+  .hoy-hero .hero-date { font-size: 22px; font-weight: 700; letter-spacing: -0.3px; margin: 4px 0 14px; }
+  .hoy-slots-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; }
+  .hoy-slot-mini {
+    background: rgba(255,255,255,0.2); border-radius: var(--radius-sm);
+    padding: 10px 6px; text-align: center; cursor: pointer;
+    transition: background .15s;
+  }
+  .hoy-slot-mini:active { background: rgba(255,255,255,0.3); }
+  .hoy-slot-mini .sm-icon { font-size: 22px; }
+  .hoy-slot-mini .sm-label { font-size: 9px; font-weight: 600; opacity: 0.8; margin-top: 3px; text-transform: uppercase; letter-spacing: 0.2px; }
+  .hoy-slot-mini .sm-val { font-size: 9px; opacity: 0.9; margin-top: 1px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+  /* PLAN SEMANA */
+  .plan-week {
+    margin: 0 16px 12px;
+    display: flex; gap: 6px;
+  }
+  .plan-day-col {
+    flex: 1; text-align: center;
+  }
+  .plan-day-col .day-name { font-size: 11px; font-weight: 600; color: var(--label2); text-transform: uppercase; letter-spacing: 0.2px; margin-bottom: 6px; }
+  .plan-day-col .day-circle {
+    width: 40px; height: 40px; border-radius: 50%;
+    background: var(--bg2);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 20px; margin: 0 auto 4px; cursor: pointer;
+    border: 1.5px solid var(--separator); transition: all .15s;
+  }
+  .plan-day-col .day-circle.today { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(201,169,110,0.15); }
+  .plan-day-col .day-circle.filled { background: var(--fill3); border-color: transparent; }
+  .plan-day-col .day-circle:active { transform: scale(0.93); }
+  .plan-day-col .day-mini { font-size: 10px; color: var(--label2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+  /* STATS VIEW */
+  .stat-bar-row {
+    padding: 0 20px;
+    display: flex; align-items: center; gap: 10px; margin-bottom: 10px;
+  }
+  .stat-bar-row .sbl { font-size: 14px; color: var(--label2); width: 80px; text-align: right; flex-shrink: 0; }
+  .stat-bar-track { flex: 1; height: 8px; background: var(--fill2); border-radius: 4px; overflow: hidden; }
+  .stat-bar-fill { height: 100%; border-radius: 4px; background: var(--ios-blue); }
+  .stat-bar-row .sbv { font-size: 13px; color: var(--label2); width: 20px; text-align: right; }
+
+  /* WISHLIST */
+  .wish-add-bar {
+    margin: 0 16px 10px;
+    background: var(--bg2); border-radius: var(--radius-md);
+    padding: 12px 16px;
+    display: flex; gap: 10px; align-items: center;
+  }
+  .wish-add-bar input {
+    flex: 1; border: none; background: transparent; outline: none;
+    font-size: 17px; font-family: var(--font); color: var(--label);
+  }
+  .wish-add-bar input::placeholder { color: var(--label3); }
+  .wish-add-bar button {
+    background: var(--accent); color: var(--accent-label); border: none;
+    border-radius: 8px; padding: 7px 14px; font-size: 15px;
+    font-weight: 600; font-family: var(--font); cursor: pointer;
+  }
+  .wish-item-del {
+    background: none; border: none; cursor: pointer; padding: 4px 8px;
+    color: var(--ios-red); font-size: 16px;
+  }
+
+  /* BOTTOM TAB BAR */
+  .tab-bar {
+    position: absolute; bottom: 0; left: 0; right: 0;
+    height: var(--tab-height);
+    background: rgba(242,242,247,0.85);
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    border-top: 0.5px solid var(--separator);
+    display: flex; z-index: 100;
+    padding-bottom: var(--safe-bottom);
+  }
+  .tab-item {
+    flex: 1; display: flex; flex-direction: column;
+    align-items: center; justify-content: center; gap: 3px;
+    cursor: pointer; transition: opacity .1s;
+    padding-top: 8px;
+    border: none; background: transparent;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .tab-item:active { opacity: 0.6; }
+  .tab-icon { font-size: 24px; line-height: 1; }
+  .tab-icon svg { display: block; }
+  .tab-label { font-size: 10px; font-weight: 500; color: var(--label2); letter-spacing: 0.1px; }
+  .tab-item.active .tab-icon svg path, .tab-item.active .tab-icon svg rect, .tab-item.active .tab-icon svg circle { fill: var(--ios-blue); }
+  .tab-item.active .tab-label { color: var(--accent); font-weight: 600; }
+
+  /* MODAL iOS sheet */
+  .sheet-overlay {
+    display: none; position: absolute; inset: 0; z-index: 150;
+    background: rgba(0,0,0,0.3); align-items: flex-end;
+  }
+  .sheet-overlay.open { display: flex; }
+  .sheet {
+    background: var(--bg);
+    border-radius: 20px 20px 0 0;
+    width: 100%; max-height: 88%;
+    overflow-y: auto; padding-bottom: 30px;
+  }
+  .sheet::-webkit-scrollbar { display: none; }
+  .sheet-handle { width: 36px; height: 4px; background: var(--label3); border-radius: 2px; margin: 10px auto 14px; }
+  .sheet-title { font-size: 17px; font-weight: 600; text-align: center; padding-bottom: 14px; border-bottom: 0.5px solid var(--separator); margin: 0 20px; }
+  .sheet-field { margin: 12px 16px 0; }
+  .sheet-field label { font-size: 13px; color: var(--label2); font-weight: 500; display: block; margin-bottom: 4px; padding-left: 4px; }
+  .sheet-field input, .sheet-field select {
+    width: 100%; padding: 13px 14px;
+    background: var(--bg2); border: none; outline: none;
+    border-radius: var(--radius-md); font-size: 17px; font-family: var(--font);
+    color: var(--label); appearance: none;
+  }
+  .sheet-field input[type="color"] { height: 48px; padding: 6px 14px; }
+  .sheet-row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 12px 16px 0; }
+  .sheet-row2 .sheet-field { margin: 0; }
+  .sheet-actions { display: flex; gap: 10px; margin: 20px 16px 0; }
+  .sheet-actions button {
+    flex: 1; padding: 14px; border-radius: var(--radius-md); border: none;
+    font-size: 17px; font-weight: 600; font-family: var(--font); cursor: pointer;
+  }
+  .sheet-cancel { background: var(--bg2); color: var(--accent); }
+  .sheet-save { background: var(--accent); color: var(--accent-label); }
+
+  /* EMPTY STATE */
+  .empty-state { text-align: center; padding: 40px 20px; color: var(--label2); }
+  .empty-state .es-icon { font-size: 48px; margin-bottom: 12px; }
+  .empty-state .es-title { font-size: 20px; font-weight: 600; color: var(--label); margin-bottom: 6px; }
+  .empty-state .es-sub { font-size: 15px; }
+
+  /* DESKTOP: sidebar layout */
+  @media (min-width: 768px) {
+    body { background: #D1D1D6; }
+    .device-wrapper { padding: 40px; gap: 40px; align-items: flex-start; }
+    .device-info {
+      width: 260px; flex-shrink: 0;
+      background: #fff; border-radius: 20px;
+      padding: 28px 24px;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.1);
+    }
+    .device-info h2 { font-size: 20px; font-weight: 700; color: #000; margin-bottom: 8px; }
+    .device-info p { font-size: 14px; color: #666; line-height: 1.6; margin-bottom: 16px; }
+    .device-info .feature { display: flex; align-items: center; gap: 8px; padding: 8px 0; border-top: 0.5px solid #E5E5EA; font-size: 13px; color: #333; }
+    .device-info .feature-icon { width: 28px; height: 28px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 16px; flex-shrink: 0; }
+  }
+  #fab:active {
+    transform: scale(0.91);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+  }
+
+  @media (max-width: 767px) {
+    body { background: var(--bg); }
+    .device-wrapper { padding: 0; min-height: 100dvh; align-items: stretch; justify-content: stretch; background: var(--bg); }
+    .device-frame { width: 100%; height: 100dvh; border-radius: 0; box-shadow: none; }
+    .device-screen { border-radius: 0; }
+    .device-notch { display: none; }
+    .device-info { display: none; }
+    .status-bar { padding-top: env(safe-area-inset-top, 14px); }
+  }
+</style>
+</head>
+<body>
+<div class="device-wrapper">
+
+  <div class="device-info" style="display:none" id="desktop-info">
+    <h2>👗 Armario</h2>
+    <p>Gestiona tu ropa, registra outfits y planifica la semana. Diseño iOS nativo.</p>
+    <div class="feature"><div class="feature-icon" style="background:#E3F2FD">🧺</div> Catálogo con filtros</div>
+    <div class="feature"><div class="feature-icon" style="background:#E8F5E9">👕</div> Outfit del día</div>
+    <div class="feature"><div class="feature-icon" style="background:#FFF3E0">📅</div> Planificador semanal</div>
+    <div class="feature"><div class="feature-icon" style="background:#F3E5F5">📊</div> Estadísticas de uso</div>
+    <div class="feature"><div class="feature-icon" style="background:#FCE4EC">🛍️</div> Lista de deseos</div>
+    <p style="margin-top:16px;font-size:12px;color:#999">Conectado a Google Sheets para sincronización en tiempo real</p>
+  </div>
+
+  <div class="device-frame">
+    <div class="device-notch"><div class="device-camera"></div></div>
+    <div class="device-screen">
+      <div class="app-shell">
+        <div class="status-bar">
+          <span class="status-time" id="clock">9:41</span>
+          <div style="display:flex;align-items:center;gap:8px">
+            <div id="sync-dot" style="width:7px;height:7px;border-radius:50%;background:#34C759;opacity:0;transition:opacity .4s,background .3s;flex-shrink:0" title="Sincronizado"></div>
+            <button id="theme-btn" onclick="toggleTheme()" aria-label="Cambiar tema" style="
+              background:none;border:none;cursor:pointer;padding:3px;
+              display:flex;align-items:center;justify-content:center;
+              border-radius:50%;width:28px;height:28px;
+              -webkit-tap-highlight-color:transparent;
+            ">
+              <svg id="theme-icon-light" width="18" height="18" viewBox="0 0 24 24" fill="none" style="display:block">
+                <circle cx="12" cy="12" r="4" stroke="currentColor" stroke-width="1.8"/>
+                <path d="M12 2v2M12 20v2M2 12h2M20 12h2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+              </svg>
+              <svg id="theme-icon-dark" width="18" height="18" viewBox="0 0 24 24" fill="none" style="display:none">
+                <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79Z" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </button>
+          </div>
+          <div class="status-icons">
+            <svg width="17" height="12" viewBox="0 0 17 12"><rect x="0" y="3" width="3" height="9" rx="1" fill="currentColor" opacity="0.3"/><rect x="4.5" y="2" width="3" height="10" rx="1" fill="currentColor" opacity="0.5"/><rect x="9" y="0" width="3" height="12" rx="1" fill="currentColor" opacity="0.75"/><rect x="13.5" y="0" width="3" height="12" rx="1" fill="currentColor"/></svg>
+            <svg width="16" height="12" viewBox="0 0 16 12"><path d="M8 2.5C10.2 2.5 12.1 3.5 13.4 5L15 3.3C13.2 1.3 10.7 0 8 0C5.3 0 2.8 1.3 1 3.3L2.6 5C3.9 3.5 5.8 2.5 8 2.5Z" fill="currentColor"/><path d="M8 5.5C9.4 5.5 10.7 6.1 11.6 7L13.2 5.3C11.9 3.9 10 3 8 3C6 3 4.1 3.9 2.8 5.3L4.4 7C5.3 6.1 6.6 5.5 8 5.5Z" fill="currentColor" opacity="0.7"/><circle cx="8" cy="10" r="2" fill="currentColor"/></svg>
+            <svg width="25" height="12" viewBox="0 0 25 12"><rect x="0" y="1" width="22" height="10" rx="3" stroke="currentColor" stroke-width="1" fill="none"/><rect x="22.5" y="3.5" width="2" height="5" rx="1" fill="currentColor" opacity="0.4"/><rect x="1.5" y="2.5" width="16" height="7" rx="2" fill="currentColor"/></svg>
+          </div>
+        </div>
+
+        <div class="scroll-area" id="scroll-area">
+
+          <!-- ARMARIO TAB -->
+          <div id="tab-armario" class="tab-content">
+            <div class="large-nav">
+              <div class="nav-left">
+                <div class="large-title">Armario</div>
+                <div class="nav-sub" id="subtitulo-armario">0 prendas</div>
+              </div>
+              <button class="theme-toggle-btn" onclick="toggleTheme()" aria-label="Cambiar tema">
+          <svg class="theme-icon-light" width="14" height="14" viewBox="0 0 24 24" fill="none">
+            <circle cx="12" cy="12" r="4" stroke="currentColor" stroke-width="2"/>
+            <path d="M12 2v2M12 20v2M2 12h2M20 12h2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+          <svg class="theme-icon-dark" width="14" height="14" viewBox="0 0 24 24" fill="none" style="display:none">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          <span class="theme-label">Oscuro</span>
+        </button>
+            </div>
+            <div class="search-wrap">
+              <div class="search-bar">
+                <svg width="14" height="14" viewBox="0 0 14 14" fill="currentColor"><path d="M5.5 0a5.5 5.5 0 1 0 3.43 9.8l3.37 3.38a.75.75 0 1 0 1.06-1.06L10 8.93A5.5 5.5 0 0 0 5.5 0Zm0 1.5a4 4 0 1 1 0 8 4 4 0 0 1 0-8Z"/></svg>
+                <input type="text" placeholder="Buscar" id="search-input" oninput="renderArmario()">
+              </div>
+            </div>
+            <div class="chips-scroll" id="chips-tipo">
+              <div class="chip active" data-val="" onclick="setChip(this,'tipo')">Todo</div>
+              <div class="chip" data-val="Camiseta" onclick="setChip(this,'tipo')">Camisetas</div>
+              <div class="chip" data-val="Pantalón" onclick="setChip(this,'tipo')">Pantalones</div>
+              <div class="chip" data-val="Chaqueta" onclick="setChip(this,'tipo')">Chaquetas</div>
+              <div class="chip" data-val="Sudadera" onclick="setChip(this,'tipo')">Sudaderas</div>
+              <div class="chip" data-val="Zapatillas" onclick="setChip(this,'tipo')">Zapatillas</div>
+              <div class="chip" data-val="Camisa" onclick="setChip(this,'tipo')">Camisas</div>
+              <div class="chip" data-val="Abrigo" onclick="setChip(this,'tipo')">Abrigos</div>
+            </div>
+            <div class="chips-scroll" id="chips-ocasion">
+              <div class="chip active" data-val="" onclick="setChip(this,'ocasion')">Todas</div>
+              <div class="chip" data-val="Casual" onclick="setChip(this,'ocasion')">Casual</div>
+              <div class="chip" data-val="Sport" onclick="setChip(this,'ocasion')">Sport</div>
+              <div class="chip" data-val="Trabajo" onclick="setChip(this,'ocasion')">Trabajo</div>
+            </div>
+            <div class="prendas-grid" id="prendas-grid"></div>
+            <button class="ios-btn-primary" onclick="abrirSheet()">
+              <svg width="18" height="18" viewBox="0 0 18 18" fill="white"><path d="M9 1a1 1 0 0 1 1 1v6h6a1 1 0 1 1 0 2h-6v6a1 1 0 1 1-2 0v-6H2a1 1 0 0 1 0-2h6V2a1 1 0 0 1 1-1Z"/></svg>
+              Añadir prenda
+            </button>
+          </div>
+
+          <!-- HOY TAB -->
+          <div id="tab-hoy" class="tab-content" style="display:none">
+            <div class="large-nav">
+              <div class="nav-left">
+                <div class="large-title">Hoy llevo</div>
+                <div class="nav-sub" id="hoy-fecha"></div>
+              </div>
+              <button class="theme-toggle-btn" onclick="toggleTheme()" aria-label="Cambiar tema">
+          <svg class="theme-icon-light" width="14" height="14" viewBox="0 0 24 24" fill="none">
+            <circle cx="12" cy="12" r="4" stroke="currentColor" stroke-width="2"/>
+            <path d="M12 2v2M12 20v2M2 12h2M20 12h2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+          <svg class="theme-icon-dark" width="14" height="14" viewBox="0 0 24 24" fill="none" style="display:none">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          <span class="theme-label">Oscuro</span>
+        </button>
+            </div>
+            <div class="hoy-hero">
+              <div class="hero-label">Outfit de hoy</div>
+              <div class="hero-date" id="hoy-fecha-hero"></div>
+              <div class="hoy-slots-grid" id="hoy-slots-grid"></div>
+            </div>
+            <div class="section-header">Últimos outfits</div>
+            <div class="ios-list" id="hoy-historial-list"></div>
+          </div>
+
+          <!-- PLAN TAB -->
+          <div id="tab-plan" class="tab-content" style="display:none">
+            <div class="large-nav">
+              <div class="nav-left">
+                <div class="large-title">Semana</div>
+                <div class="nav-sub">Planifica tus outfits</div>
+              </div>
+              <button class="theme-toggle-btn" onclick="toggleTheme()" aria-label="Cambiar tema">
+          <svg class="theme-icon-light" width="14" height="14" viewBox="0 0 24 24" fill="none">
+            <circle cx="12" cy="12" r="4" stroke="currentColor" stroke-width="2"/>
+            <path d="M12 2v2M12 20v2M2 12h2M20 12h2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+          <svg class="theme-icon-dark" width="14" height="14" viewBox="0 0 24 24" fill="none" style="display:none">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          <span class="theme-label">Oscuro</span>
+        </button>
+            </div>
+            <div class="section-header">Esta semana</div>
+            <div class="plan-week" id="plan-week"></div>
+            <div class="section-header" style="margin-top:8px">Selecciona una prenda</div>
+            <div class="prendas-grid" id="plan-prendas-grid" style="margin-bottom:0"></div>
+          </div>
+
+          <!-- STATS TAB -->
+          <div id="tab-stats" class="tab-content" style="display:none">
+            <div class="large-nav">
+              <div class="nav-left">
+                <div class="large-title">Estadísticas</div>
+                <div class="nav-sub">Tu armario en números</div>
+              </div>
+              <button class="theme-toggle-btn" onclick="toggleTheme()" aria-label="Cambiar tema">
+          <svg class="theme-icon-light" width="14" height="14" viewBox="0 0 24 24" fill="none">
+            <circle cx="12" cy="12" r="4" stroke="currentColor" stroke-width="2"/>
+            <path d="M12 2v2M12 20v2M2 12h2M20 12h2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+          <svg class="theme-icon-dark" width="14" height="14" viewBox="0 0 24 24" fill="none" style="display:none">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          <span class="theme-label">Oscuro</span>
+        </button>
+            </div>
+            <div class="stats-row" id="stats-tiles"></div>
+            <div class="section-header">Uso por tipo</div>
+            <div id="stats-bars-tipo"></div>
+            <div class="section-header" style="margin-top:8px">Uso por ocasión</div>
+            <div id="stats-bars-oc" style="padding-bottom:8px"></div>
+          </div>
+
+          <!-- WISH TAB -->
+          <div id="tab-wish" class="tab-content" style="display:none">
+            <div class="large-nav">
+              <div class="nav-left">
+                <div class="large-title">Wishlist</div>
+                <div class="nav-sub" id="wish-sub">Lo que quiero comprar</div>
+              </div>
+              <button class="theme-toggle-btn" onclick="toggleTheme()" aria-label="Cambiar tema">
+          <svg class="theme-icon-light" width="14" height="14" viewBox="0 0 24 24" fill="none">
+            <circle cx="12" cy="12" r="4" stroke="currentColor" stroke-width="2"/>
+            <path d="M12 2v2M12 20v2M2 12h2M20 12h2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+          <svg class="theme-icon-dark" width="14" height="14" viewBox="0 0 24 24" fill="none" style="display:none">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          <span class="theme-label">Oscuro</span>
+        </button>
+            </div>
+            <div class="wish-add-bar">
+              <input type="text" id="wish-input" placeholder="Añadir prenda..." onkeydown="if(event.key==='Enter')addWish()">
+              <button onclick="addWish()">Añadir</button>
+            </div>
+            <div class="ios-list" id="wish-list"></div>
+          </div>
+
+        </div>
+
+        <!-- FAB -->
+        <button id="fab" onclick="abrirSheet()" aria-label="Añadir prenda" style="
+          position:absolute;
+          bottom:calc(var(--tab-height) + 16px);
+          right:20px;
+          width:56px;height:56px;
+          border-radius:50%;
+          background:var(--accent);
+          border:none;
+          cursor:pointer;
+          display:flex;align-items:center;justify-content:center;
+          box-shadow:0 4px 16px rgba(0,0,0,0.25), 0 2px 6px rgba(0,0,0,0.15);
+          z-index:90;
+          transition:transform .15s ease, box-shadow .15s ease;
+          -webkit-tap-highlight-color:transparent;
+        ">
+          <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
+            <path d="M11 2v18M2 11h18" stroke="#fff" stroke-width="2.5" stroke-linecap="round"/>
+          </svg>
+        </button>
+
+        <!-- TAB BAR -->
+        <div class="tab-bar">
+          <button class="tab-item active" onclick="switchTab('armario',this)">
+            <div class="tab-icon">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V9Z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/><path d="M9 22V12h6v10" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg>
+            </div>
+            <span class="tab-label">Armario</span>
+          </button>
+          <button class="tab-item" onclick="switchTab('hoy',this)">
+            <div class="tab-icon">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><rect x="3" y="6" width="18" height="14" rx="2" stroke="currentColor" stroke-width="1.5"/><path d="M3 10h18M8 6V4M16 6V4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+            </div>
+            <span class="tab-label">Hoy</span>
+          </button>
+          <button class="tab-item" onclick="switchTab('plan',this)">
+            <div class="tab-icon">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><rect x="3" y="4" width="18" height="18" rx="2" stroke="currentColor" stroke-width="1.5"/><path d="M8 2v4M16 2v4M3 10h18" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><circle cx="8" cy="15" r="1.5" fill="currentColor"/><circle cx="12" cy="15" r="1.5" fill="currentColor"/><circle cx="16" cy="15" r="1.5" fill="currentColor"/></svg>
+            </div>
+            <span class="tab-label">Semana</span>
+          </button>
+          <button class="tab-item" onclick="switchTab('stats',this)">
+            <div class="tab-icon">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M18 20V10M12 20V4M6 20v-6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+            </div>
+            <span class="tab-label">Stats</span>
+          </button>
+          <button class="tab-item" onclick="switchTab('wish',this)">
+            <div class="tab-icon">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78Z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg>
+            </div>
+            <span class="tab-label">Wishlist</span>
+          </button>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SHEET MODAL -->
+<div class="sheet-overlay" id="sheet-overlay" onclick="cerrarSheet(event)">
+  <div class="sheet" id="sheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-title" id="sheet-title">Nueva prenda</div>
+    <div class="sheet-field">
+      <label>Nombre</label>
+      <input id="f-nombre" placeholder="Ej: Camiseta básica blanca">
+    </div>
+    <div class="sheet-row2">
+      <div class="sheet-field"><label>Tipo</label><select id="f-tipo"><option>Camiseta</option><option>Pantalón</option><option>Chaqueta</option><option>Sudadera</option><option>Camisa</option><option>Zapatillas</option><option>Zapatos</option><option>Abrigo</option><option>Accesorio</option></select></div>
+      <div class="sheet-field"><label>Talla</label><input id="f-talla" placeholder="M / 42"></div>
+    </div>
+    <div class="sheet-row2">
+      <div class="sheet-field"><label>Color</label><input type="color" id="f-color" value="#ffffff"></div>
+      <div class="sheet-field"><label>Emoji</label><input id="f-emoji" placeholder="👕" maxlength="4"></div>
+    </div>
+    <div class="sheet-row2">
+      <div class="sheet-field"><label>Temporada</label><select id="f-temp"><option>Verano</option><option>Invierno</option><option>Entretiempo</option></select></div>
+      <div class="sheet-field"><label>Ocasión</label><select id="f-oc"><option>Casual</option><option>Sport</option><option>Trabajo</option></select></div>
+    </div>
+    <div class="sheet-field">
+      <label>Foto</label>
+      <input type="file" id="f-foto-file" accept="image/*" style="display:none" onchange="onFotoChange(event)">
+      <div id="foto-preview-wrap" style="position:relative;border-radius:var(--radius-md);overflow:hidden;background:var(--fill2);height:140px;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-direction:column;gap:8px;" onclick="document.getElementById('f-foto-file').click()">
+        <img id="foto-preview-img" src="" style="display:none;width:100%;height:100%;object-fit:cover;position:absolute;inset:0;">
+        <div id="foto-preview-placeholder" style="display:flex;flex-direction:column;align-items:center;gap:6px;">
+          <svg width="32" height="32" viewBox="0 0 32 32" fill="none"><rect x="3" y="8" width="26" height="18" rx="3" stroke="rgba(60,60,67,0.4)" stroke-width="1.5"/><circle cx="16" cy="17" r="5" stroke="rgba(60,60,67,0.4)" stroke-width="1.5"/><path d="M11 8l2-3h6l2 3" stroke="rgba(60,60,67,0.4)" stroke-width="1.5" stroke-linejoin="round"/></svg>
+          <span style="font-size:14px;color:var(--label2);font-weight:500">Cámara o galería</span>
+          <span style="font-size:12px;color:var(--label3)">Toca para elegir</span>
+        </div>
+        <div id="foto-change-btn" style="display:none;position:absolute;bottom:8px;right:8px;background:rgba(0,0,0,0.55);backdrop-filter:blur(8px);color:#fff;font-size:12px;font-weight:600;padding:5px 10px;border-radius:12px;">Cambiar</div>
+        <div id="foto-del-btn" style="display:none;position:absolute;top:8px;right:8px;background:rgba(0,0,0,0.55);backdrop-filter:blur(8px);color:#fff;font-size:18px;width:28px;height:28px;border-radius:50%;display:none;align-items:center;justify-content:center;cursor:pointer;" onclick="event.stopPropagation();borrarFoto()">×</div>
+      </div>
+    </div>
+    <div class="sheet-actions">
+      <button class="sheet-cancel" onclick="cerrarSheet()">Cancelar</button>
+      <button class="sheet-save" onclick="guardarPrenda()">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── CONFIG ────────────────────────────────────────────────
+const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyGasERXZpQ1ozkyWHPRuaZDtZJi6mMI7GLhz-Ii-Q2vJDPb1x7R8qXvXbps7lnVXbfng/exec'; // ← pega aquí la URL del Apps Script
+
+// ── SYNC ENGINE ──────────────────────────────────────────
+let syncQueue = JSON.parse(localStorage.getItem('armario_queue') || '[]');
+let isSyncing = false;
+let syncTimeout = null;
+
+function scheduleSync() {
+  clearTimeout(syncTimeout);
+  syncTimeout = setTimeout(flushSync, 1500); // espera 1.5s tras el último cambio
+}
+
+async function flushSync() {
+  if (isSyncing || !SCRIPT_URL || SCRIPT_URL === 'TU_URL_AQUI') return;
+  isSyncing = true;
+  setSyncIndicator('syncing');
+  try {
+    await Promise.all([
+      postSheet('sync_prendas',  { prendas:  prendas.map(p => ({...p, foto:''})) }),
+      postSheet('sync_wishlist', { wishlist }),
+      postSheet('sync_usos',     { usos }),
+      postSheet('sync_plan',     { plan }),
+    ]);
+    syncQueue = [];
+    localStorage.setItem('armario_queue', '[]');
+    setSyncIndicator('ok');
+  } catch(e) {
+    setSyncIndicator('error');
+  } finally {
+    isSyncing = false;
+  }
+}
+
+async function postSheet(accion, data) {
+  const r = await fetch(SCRIPT_URL, {
+    method: 'POST',
+    body: JSON.stringify({ accion, ...data }),
+  });
+  if (!r.ok) throw new Error('HTTP ' + r.status);
+  return r.json();
+}
+
+async function fetchSheet(sheet) {
+  const r = await fetch(SCRIPT_URL + '?sheet=' + sheet);
+  if (!r.ok) throw new Error('HTTP ' + r.status);
+  return r.json();
+}
+
+// Carga silenciosa desde Sheets al arrancar (cache-first)
+async function backgroundRefresh() {
+  if (!SCRIPT_URL || SCRIPT_URL === 'TU_URL_AQUI') return;
+  setSyncIndicator('syncing');
+  try {
+    const [rP, rW, rU] = await Promise.all([
+      fetchSheet('Prendas'),
+      fetchSheet('Wishlist'),
+      fetchSheet('Usos'),
+    ]);
+    // Merge: local tiene fotos (base64), Sheets tiene texto actualizado
+    // Solo sincronizamos si Sheets tiene IDs que coinciden con local o son nuevos
+    if (rP.data && rP.data.length) {
+      const localIds = new Set(prendas.map(p => p.id));
+      const sheetIds = new Set(rP.data.map(p => p.id));
+      const fotoMap = {};
+      prendas.forEach(p => { if(p.id && p.foto) fotoMap[p.id] = p.foto; });
+      // Prendas que están en local pero no en Sheets = recién añadidas, conservar
+      const soloLocal = prendas.filter(p => !sheetIds.has(p.id));
+      // Prendas de Sheets
+      const deSheets = rP.data.map(p => ({ ...p, usos: Number(p.usos)||0, foto: fotoMap[p.id]||'' }));
+      prendas = [...deSheets, ...soloLocal];
+    }
+    if (rW.data && rW.data.length) wishlist = rW.data;
+    if (rU.data && rU.data.length) usos = rU.data.map(u => ({
+      ...u,
+      prendas: typeof u.prendas === 'string' ? u.prendas.split(', ').filter(Boolean) : (u.prendas||[])
+    }));
+    save();
+    renderArmario();
+    setSyncIndicator('ok');
+  } catch(e) {
+    setSyncIndicator('offline');
+  }
+}
+
+// Indicador de sync discreto (esquina top-right de la screen)
+function setSyncIndicator(state) {
+  let el = document.getElementById('sync-dot');
+  if (!el) return;
+  const states = {
+    syncing: { bg:'#FF9500', title:'Sincronizando...' },
+    ok:      { bg:'#34C759', title:'Sincronizado' },
+    error:   { bg:'#FF3B30', title:'Error de sync' },
+    offline: { bg:'#8E8E93', title:'Sin conexión' },
+  };
+  const s = states[state] || states.offline;
+  el.style.background = s.bg;
+  el.title = s.title;
+  if (state === 'ok') setTimeout(() => { el.style.opacity='0'; }, 2000);
+  else el.style.opacity = '1';
+}
+
+// ─────────────────────────────────────────────────────────
+const EMOJIS = {Camiseta:'👕',Pantalón:'👖',Chaqueta:'🧥',Sudadera:'🩱',Camisa:'👔',Zapatillas:'👟',Zapatos:'👞',Abrigo:'🧣',Accesorio:'⌚'};
+const DIAS = ['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'];
+const SLOTS = [{label:'Top',icon:'👕'},{label:'Bottom',icon:'👖'},{label:'Shoes',icon:'👟'},{label:'Layer',icon:'🧥'},{label:'Extra',icon:'⌚'}];
+
+let prendas = JSON.parse(localStorage.getItem('ios_prendas')||'[]');
+let wishlist = JSON.parse(localStorage.getItem('ios_wish')||'[]');
+let plan = JSON.parse(localStorage.getItem('ios_plan')||'{}');
+let usos = JSON.parse(localStorage.getItem('ios_usos')||'[]');
+let hoy = {};
+let editIdx = null;
+let filtros = {tipo:'', ocasion:''};
+let planDia = null;
+
+// Sin datos de demo — el armario empieza vacío y se rellena desde Sheets
+
+function generarId() {
+  return 'p_' + Math.random().toString(36).substr(2,9) + '_' + Date.now();
+}
+
+function save(){
+  localStorage.setItem('ios_prendas',JSON.stringify(prendas));
+  localStorage.setItem('ios_wish',JSON.stringify(wishlist));
+  localStorage.setItem('ios_plan',JSON.stringify(plan));
+  localStorage.setItem('ios_usos',JSON.stringify(usos));
+  scheduleSync(); // sync en background, no bloquea nada
+}
+
+function switchTab(tab, btn){
+  document.querySelectorAll('.tab-content').forEach(t=>t.style.display='none');
+  document.querySelectorAll('.tab-item').forEach(b=>b.classList.remove('active'));
+  document.getElementById('tab-'+tab).style.display='block';
+  btn.classList.add('active');
+  document.getElementById('scroll-area').scrollTop=0;
+  if(tab==='armario') renderArmario();
+  if(tab==='hoy') renderHoy();
+  if(tab==='plan') renderPlan();
+  if(tab==='stats') renderStats();
+  if(tab==='wish') renderWish();
+}
+
+function setChip(el, type){
+  const parent = el.parentElement;
+  parent.querySelectorAll('.chip').forEach(c=>c.classList.remove('active'));
+  el.classList.add('active');
+  filtros[type] = el.dataset.val;
+  renderArmario();
+}
+
+function renderArmario(){
+  const q = (document.getElementById('search-input').value||'').toLowerCase();
+  const filtered = prendas.filter(p=>
+    (!q||p.nombre.toLowerCase().includes(q)||p.tipo.toLowerCase().includes(q))&&
+    (!filtros.tipo||p.tipo===filtros.tipo)&&
+    (!filtros.ocasion||p.ocasion===filtros.ocasion)
+  );
+  document.getElementById('subtitulo-armario').textContent = prendas.length+' prendas';
+  const grid = document.getElementById('prendas-grid');
+  if(!filtered.length){
+    grid.innerHTML='<div class="empty-state" style="grid-column:span 2"><div class="es-icon">🔍</div><div class="es-title">Sin resultados</div><div class="es-sub">Prueba con otros filtros</div></div>';
+    return;
+  }
+  grid.innerHTML = filtered.map((p,i)=>{
+    const ri = prendas.indexOf(p);
+    const bg = p.color==='#ffffff'||p.color==='#f0f0f0'||p.color==='#f5f5f5' ? '#F8F8F8' : p.color+'22';
+    return `<div class="prenda-card" onclick="editarPrenda(${ri})" style="animation-delay:${Math.min(i,8)*40}ms">
+      <div class="card-img" style="background:${bg}">
+        ${p.foto?`<img src="${p.foto}" style="width:100%;height:100%;object-fit:cover">` : (p.emoji||EMOJIS[p.tipo]||'👕')}
+        ${p.usos?`<div class="usos-pill">${p.usos}×</div>`:''}
+        <div class="color-dot-img" style="background:${p.color}"></div>
+        <button class="del-card-btn" onclick="event.stopPropagation();borrarPrenda(${ri})" aria-label="Eliminar">
+          <svg width="10" height="10" viewBox="0 0 10 10" fill="white"><path d="M1 1l8 8M9 1L1 9" stroke="white" stroke-width="1.8" stroke-linecap="round"/></svg>
+        </button>
+      </div>
+      <div class="card-body">
+        <div class="card-nombre">${p.nombre}</div>
+        <div class="card-meta">Talla ${p.talla||'—'}</div>
+        <div class="card-tags">
+          <span class="ctag ${p.temporada.toLowerCase()}">${p.temporada}</span>
+          <span class="ctag ${p.ocasion.toLowerCase()}">${p.ocasion}</span>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function renderHoy(){
+  const ahora = new Date();
+  const fecha = ahora.toLocaleDateString('es-ES',{weekday:'long',day:'numeric',month:'long'});
+  const fechaCap = fecha.charAt(0).toUpperCase()+fecha.slice(1);
+  document.getElementById('hoy-fecha').textContent = fechaCap;
+  document.getElementById('hoy-fecha-hero').textContent = fechaCap;
+  document.getElementById('hoy-slots-grid').innerHTML = SLOTS.map(s=>{
+    const sel = hoy[s.label];
+    return `<div class="hoy-slot-mini" onclick="selHoy('${s.label}')">
+      <div class="sm-icon">${sel?(sel.emoji||s.icon):s.icon}</div>
+      <div class="sm-label">${s.label}</div>
+      <div class="sm-val">${sel?sel.nombre.substring(0,10):'—'}</div>
+    </div>`;
+  }).join('');
+  const hist = usos.slice(-6).reverse();
+  document.getElementById('hoy-historial-list').innerHTML = hist.length
+    ? hist.map(u=>`<div class="ios-list-row">
+        <div class="row-icon" style="background:#EEF2FF;font-size:18px">📅</div>
+        <div class="row-content"><div class="row-title">${u.fecha}</div><div class="row-sub">${u.prendas.slice(0,2).join(', ')}${u.prendas.length>2?' +más':''}</div></div>
+      </div>`).join('')
+    : '<div class="empty-state"><div class="es-sub">Aún no hay outfits registrados</div></div>';
+}
+
+function selHoy(slot){
+  const idx = parseInt(prompt('Elige prenda (número):\n'+prendas.map((p,i)=>`${i}: ${p.nombre}`).join('\n')));
+  if(!isNaN(idx)&&prendas[idx]){ hoy[slot]=prendas[idx]; renderHoy(); }
+}
+
+function renderPlan(){
+  const hoyNum = new Date().getDay();
+  const semana = ['Lun','Mar','Mié','Jue','Vie','Sáb','Dom'];
+  document.getElementById('plan-week').innerHTML = semana.map((d,i)=>{
+    const p = plan[d];
+    const isHoy = i === (hoyNum===0?6:hoyNum-1);
+    return `<div class="plan-day-col" onclick="selPlanDia('${d}')">
+      <div class="day-name">${d}</div>
+      <div class="day-circle ${isHoy?'today':''} ${p?'filled':''}">${p?(p.emoji||'👕'):'+'}</div>
+      <div class="day-mini">${p?p.nombre.substring(0,8):'—'}</div>
+    </div>`;
+  }).join('');
+  document.getElementById('plan-prendas-grid').innerHTML = prendas.map((p,i)=>{
+    const bg = p.color==='#ffffff'||p.color==='#f0f0f0' ? '#F8F8F8' : p.color+'22';
+    return `<div class="prenda-card" onclick="asignarPlan(${i})" style="${planDia?'border:2px solid #007AFF':''}" title="Asignar a ${planDia||'...'}">
+      <div class="card-img" style="background:${bg}">${p.emoji||EMOJIS[p.tipo]||'👕'}</div>
+      <div class="card-body"><div class="card-nombre">${p.nombre}</div><div class="card-meta">${p.tipo}</div></div>
+    </div>`;
+  }).join('');
+}
+
+function selPlanDia(d){ planDia=d; renderPlan(); }
+function asignarPlan(i){ if(!planDia){ alert('Toca primero un día de la semana'); return; } plan[planDia]=prendas[i]; planDia=null; save(); renderPlan(); }
+
+function renderStats(){
+  const total = prendas.length;
+  const totalUsos = prendas.reduce((a,p)=>a+(p.usos||0),0);
+  const porUso = [...prendas].sort((a,b)=>(b.usos||0)-(a.usos||0));
+  const masU = porUso[0];
+  document.getElementById('stats-tiles').innerHTML = `
+    <div class="stat-tile"><div class="st-val">${total}</div><div class="st-label">Prendas</div></div>
+    <div class="stat-tile"><div class="st-val">${totalUsos}</div><div class="st-label">Usos totales</div></div>
+    <div class="stat-tile"><div class="st-val">${masU?(masU.emoji||'👕'):'—'}</div><div class="st-label">${masU?masU.nombre.substring(0,10):'—'}</div></div>
+  `;
+  const tipos={};
+  prendas.forEach(p=>tipos[p.tipo]=(tipos[p.tipo]||0)+(p.usos||0));
+  const maxT=Math.max(...Object.values(tipos),1);
+  document.getElementById('stats-bars-tipo').innerHTML=Object.entries(tipos).sort((a,b)=>b[1]-a[1]).map(([k,v])=>`
+    <div class="stat-bar-row"><div class="sbl">${k}</div><div class="stat-bar-track"><div class="stat-bar-fill" style="width:${Math.round(v/maxT*100)}%"></div></div><div class="sbv">${v}</div></div>`).join('');
+  const ocs={};
+  prendas.forEach(p=>ocs[p.ocasion]=(ocs[p.ocasion]||0)+(p.usos||0));
+  const maxO=Math.max(...Object.values(ocs),1);
+  document.getElementById('stats-bars-oc').innerHTML=Object.entries(ocs).sort((a,b)=>b[1]-a[1]).map(([k,v])=>`
+    <div class="stat-bar-row"><div class="sbl">${k}</div><div class="stat-bar-track"><div class="stat-bar-fill" style="width:${Math.round(v/maxO*100)}%;background:var(--ios-purple)"></div></div><div class="sbv">${v}</div></div>`).join('');
+}
+
+function renderWish(){
+  document.getElementById('wish-sub').textContent = wishlist.length ? `${wishlist.length} ${wishlist.length===1?'artículo':'artículos'}` : 'Lo que quiero comprar';
+  document.getElementById('wish-list').innerHTML = wishlist.length
+    ? wishlist.map((w,i)=>`<div class="ios-list-row">
+        <div class="row-icon" style="background:#FCE4EC;font-size:18px">❤️</div>
+        <div class="row-content"><div class="row-title">${w.nombre}</div>${w.precio?`<div class="row-sub">~${w.precio}</div>`:''}</div>
+        <button class="wish-item-del" onclick="event.stopPropagation();delWish(${i})">✕</button>
+      </div>`).join('')
+    : '<div class="empty-state"><div class="es-icon">🛍️</div><div class="es-title">Lista vacía</div><div class="es-sub">Añade lo que quieres comprar</div></div>';
+}
+
+function addWish(){
+  const v = document.getElementById('wish-input').value.trim();
+  if(!v) return;
+  wishlist.push({nombre:v,precio:''});
+  document.getElementById('wish-input').value='';
+  save(); renderWish();
+}
+function delWish(i){ wishlist.splice(i,1); save(); renderWish(); }
+
+let fotoBase64 = '';
+
+function setFotoPreview(src){
+  const img = document.getElementById('foto-preview-img');
+  const placeholder = document.getElementById('foto-preview-placeholder');
+  const changeBtn = document.getElementById('foto-change-btn');
+  const delBtn = document.getElementById('foto-del-btn');
+  if(src){
+    img.src = src; img.style.display='block';
+    placeholder.style.display='none';
+    changeBtn.style.display='block';
+    delBtn.style.display='flex';
+    fotoBase64 = src;
+  } else {
+    img.src=''; img.style.display='none';
+    placeholder.style.display='flex';
+    changeBtn.style.display='none';
+    delBtn.style.display='none';
+    fotoBase64 = '';
+  }
+}
+
+function borrarFoto(){ setFotoPreview(''); document.getElementById('f-foto-file').value=''; }
+
+function onFotoChange(e){
+  const file = e.target.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = ev => setFotoPreview(ev.target.result);
+  reader.readAsDataURL(file);
+}
+
+function abrirSheet(idx=null){
+  editIdx=idx;
+  document.getElementById('sheet-title').textContent = idx!==null ? 'Editar prenda' : 'Nueva prenda';
+  if(idx!==null){
+    const p=prendas[idx];
+    document.getElementById('f-nombre').value=p.nombre;
+    document.getElementById('f-tipo').value=p.tipo;
+    document.getElementById('f-talla').value=p.talla;
+    document.getElementById('f-color').value=p.color;
+    document.getElementById('f-emoji').value=p.emoji;
+    document.getElementById('f-temp').value=p.temporada;
+    document.getElementById('f-oc').value=p.ocasion;
+    setFotoPreview(p.foto||'');
+  } else {
+    ['f-nombre','f-talla','f-emoji'].forEach(id=>document.getElementById(id).value='');
+    document.getElementById('f-color').value='#ffffff';
+    setFotoPreview('');
+  }
+  document.getElementById('f-foto-file').value='';
+  document.getElementById('sheet-overlay').classList.add('open');
+}
+
+function cerrarSheet(e){
+  if(!e||e.target===document.getElementById('sheet-overlay'))
+    document.getElementById('sheet-overlay').classList.remove('open');
+}
+
+function guardarPrenda(){
+  const nombre=document.getElementById('f-nombre').value.trim();
+  if(!nombre) return;
+  const tipo=document.getElementById('f-tipo').value;
+  const existente = editIdx!==null ? prendas[editIdx] : {};
+  const p={
+    id: existente.id || generarId(),
+    nombre, tipo,
+    talla:document.getElementById('f-talla').value.trim(),
+    color:document.getElementById('f-color').value,
+    emoji:document.getElementById('f-emoji').value||EMOJIS[tipo]||'👕',
+    temporada:document.getElementById('f-temp').value,
+    ocasion:document.getElementById('f-oc').value,
+    foto:fotoBase64,
+    usos: existente.usos || 0,
+    fecha_add: existente.fecha_add || new Date().toISOString(),
+  };
+  if(editIdx!==null) prendas[editIdx]=p; else prendas.push(p);
+  save(); cerrarSheet(); renderArmario();
+  if(navigator.vibrate) navigator.vibrate(8);
+}
+
+function editarPrenda(i){ abrirSheet(i); }
+
+function borrarPrenda(i){
+  if(!confirm('¿Eliminar "' + prendas[i].nombre + '"?')) return;
+  prendas.splice(i, 1);
+  save();
+  renderArmario();
+  if(navigator.vibrate) navigator.vibrate([10,30,10]);
+}
+
+// CLOCK
+// ── THEME TOGGLE ─────────────────────────────────────────
+function toggleTheme(){
+  const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+  const next = isDark ? 'light' : 'dark';
+  applyTheme(next);
+  localStorage.setItem('iw_theme', next);
+  if(navigator.vibrate) navigator.vibrate(6);
+}
+
+function applyTheme(theme){
+  if(theme === 'dark'){
+    document.documentElement.setAttribute('data-theme','dark');
+    document.querySelectorAll('.theme-icon-light').forEach(el => el.style.display='none');
+    document.querySelectorAll('.theme-icon-dark').forEach(el  => el.style.display='block');
+    document.querySelectorAll('.theme-label').forEach(el      => el.textContent='Claro');
+    document.querySelector('meta[name="theme-color"]').content = '#0f0f1a';
+  } else {
+    document.documentElement.removeAttribute('data-theme');
+    document.querySelectorAll('.theme-icon-light').forEach(el => el.style.display='block');
+    document.querySelectorAll('.theme-icon-dark').forEach(el  => el.style.display='none');
+    document.querySelectorAll('.theme-label').forEach(el      => el.textContent='Oscuro');
+    document.querySelector('meta[name="theme-color"]').content = '#007AFF';
+  }
+}
+
+// Load saved theme immediately
+const savedTheme = localStorage.getItem('iw_theme');
+if(savedTheme) applyTheme(savedTheme);
+
+function updateClock(){
+  const now=new Date();
+  document.getElementById('clock').textContent=now.getHours()+':'+String(now.getMinutes()).padStart(2,'0');
+}
+updateClock(); setInterval(updateClock,10000);
+
+// DESKTOP info panel
+if(window.innerWidth>=768) document.getElementById('desktop-info').style.display='block';
+
+// Asignar id a prendas de demo que no lo tengan
+prendas = prendas.map(p => p.id ? p : {...p, id: generarId(), fecha_add: new Date().toISOString()});
+wishlist = wishlist.map(w => w.id ? w : {...w, id: generarId(), fecha_add: new Date().toISOString()});
+save();
+
+renderArmario();
+renderWish();
+
+// Carga en background tras 800ms (la UI ya está pintada)
+// Limpiar IDs de muestras conocidos de Sheets y local
+const DEMO_IDS_PREFIX = 'p_ufmijvoe2_\|p_wzjqice5y_\|p_xdxq9yjxe_\|p_h65r2p3ru_\|p_u7lhi48fn_\|p_x5a3xt5lr_\|p_ivwl4fdik_\|p_nroxs2kfw_';
+const DEMO_NOMBRES = ['Camiseta básica blanca','Vaqueros slim azul','Sudadera Nike gris',
+  'Camisa Oxford blanca','Air Force 1 blancas','Chaqueta negra slim',
+  'Pantalón chino beige','Abrigo lana camel'];
+
+function esDemoData(p) {
+  return DEMO_NOMBRES.includes(p.nombre) && (Number(p.usos)||0) <= 7 && !p.foto;
+}
+
+// Limpiar muestras del local storage
+prendas = prendas.filter(p => !esDemoData(p));
+save();
+
+// Limpiar muestras de Sheets (forzado, ignorando iw_cleared)
+if(!localStorage.getItem('iw_sheets_clean_v3')){
+  localStorage.setItem('iw_sheets_clean_v3','1');
+  setTimeout(async () => {
+    if(!SCRIPT_URL || SCRIPT_URL==='TU_URL_AQUI') return;
+    try {
+      // Primero cargar Sheets, quitar muestras, volver a sync
+      const rP = await fetchSheet('Prendas');
+      if(rP.data){
+        const sinMuestras = rP.data.filter(p => !esDemoData(p));
+        // Merge con local
+        const localIds = new Set(prendas.map(p => p.id));
+        const extras = sinMuestras.filter(p => !localIds.has(p.id));
+        prendas = [...prendas, ...extras];
+        save();
+        await postSheet('sync_prendas', { prendas: prendas.map(p => ({...p, foto:''})) });
+        renderArmario();
+        setSyncIndicator('ok');
+      }
+    } catch(e) { setSyncIndicator('offline'); }
+  }, 1000);
+} else {
+  setTimeout(backgroundRefresh, 800);
+}
+
+// Bienvenida primera vez
+if(!localStorage.getItem('iw_welcomed')){
+  localStorage.setItem('iw_welcomed','1');
+  setTimeout(()=>{
+    const banner = document.createElement('div');
+    banner.style.cssText='position:fixed;bottom:calc(var(--tab-height)+80px);left:50%;transform:translateX(-50%);background:#1a1a2e;color:#e8c99a;font-size:14px;padding:12px 20px;border-radius:20px;z-index:200;white-space:nowrap;box-shadow:0 4px 20px rgba(0,0,0,0.25);font-family:Georgia,serif;letter-spacing:0.5px;opacity:0;transition:opacity .4s';
+    banner.textContent = '✨ Bienvenida a Inés Wardrobe';
+    document.body.appendChild(banner);
+    requestAnimationFrame(()=>{ banner.style.opacity='1'; });
+    setTimeout(()=>{ banner.style.opacity='0'; setTimeout(()=>banner.remove(),400); }, 3000);
+  }, 2200);
+}
+</script>
+
+<!-- SPLASH SCREEN -->
+<div id="splash" style="
+  position:fixed;inset:0;z-index:999;
+  background:#1a1a2e;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0;
+  transition:opacity .5s ease;
+">
+  <svg width="100" height="100" viewBox="0 0 192 192" xmlns="http://www.w3.org/2000/svg" style="margin-bottom:20px">
+    <defs>
+      <linearGradient id="sg" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0%" stop-color="#c9a96e"/>
+        <stop offset="100%" stop-color="#e8c99a"/>
+      </linearGradient>
+    </defs>
+    <rect width="192" height="192" rx="42" fill="#1a1a2e"/>
+    <path d="M96 44 C96 44 96 38 102 35 C110 31 118 36 118 44 C118 52 108 56 96 64"
+          fill="none" stroke="url(#sg)" stroke-width="3.5" stroke-linecap="round"/>
+    <path d="M96 64 L52 98 Q44 104 44 112 Q44 122 56 122 L136 122 Q148 122 148 112 Q148 104 140 98 Z"
+          fill="none" stroke="url(#sg)" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>
+    <text x="96" y="158" font-family="Georgia,serif" font-size="26" fill="url(#sg)" text-anchor="middle" letter-spacing="6">IW</text>
+    <line x1="68" y1="165" x2="124" y2="165" stroke="rgba(201,169,110,0.4)" stroke-width="0.8"/>
+  </svg>
+  <div style="font-family:Georgia,serif;font-size:26px;font-weight:400;color:#e8c99a;letter-spacing:2px;margin-bottom:6px">Inés Wardrobe</div>
+  <div style="font-size:13px;color:rgba(201,169,110,0.5);letter-spacing:3px;text-transform:uppercase">Tu armario digital</div>
+  <div style="margin-top:40px;display:flex;gap:6px" id="splash-dots">
+    <div style="width:6px;height:6px;border-radius:50%;background:rgba(201,169,110,0.3);animation:dot 1.2s .0s infinite"></div>
+    <div style="width:6px;height:6px;border-radius:50%;background:rgba(201,169,110,0.3);animation:dot 1.2s .2s infinite"></div>
+    <div style="width:6px;height:6px;border-radius:50%;background:rgba(201,169,110,0.3);animation:dot 1.2s .4s infinite"></div>
+  </div>
+</div>
+<style>
+@keyframes dot { 0%,80%,100%{opacity:.3;transform:scale(1)} 40%{opacity:1;transform:scale(1.3)} }
+</style>
+<script>
+window.addEventListener('load', () => {
+  setTimeout(() => {
+    const s = document.getElementById('splash');
+    s.style.opacity = '0';
+    setTimeout(() => s.remove(), 500);
+  }, 1600);
+});
+</script>
+</body>
+</html>
